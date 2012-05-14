@@ -17,11 +17,13 @@ typedef struct _KEY_STATE{
 }KEY_STATE, *PKEY_STATE;
 
 typedef struct _DEVICE_EXTENSION{
+	PDEVICE_OBJECT pKeyboarDevice;//保存attach后的设备
 	HANDLE hFile;
 	bool bThreadTerminate;
 	PETHREAD pThreadObj;
 	PRKSEMAPHORE sem;
 	LIST_ENTRY MessageList;
+	KSPIN_LOCK pkLock;//insert taillist use
 }DEVICE_EXTENSION, *PDEVICE_EXTIONSION;
-
+long g_PendingWrite = 0;
 #endif
