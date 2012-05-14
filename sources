@@ -1,0 +1,4 @@
+TARGETNAME=Klog
+TARGETTYPE=DRIVER
+SOURCES=Klog.cpp KlogHook.cpp 
+
