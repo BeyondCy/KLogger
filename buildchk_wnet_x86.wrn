@@ -1,0 +1,2 @@
+1>warnings in directory f:\programing\driver\klog
+1>f:\programing\driver\klog\khook.cpp(76) : warning C4996: 'ExAllocatePool': was declared deprecated
