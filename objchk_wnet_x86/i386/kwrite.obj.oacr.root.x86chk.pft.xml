@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DEFECTS>
+<OACRDEFECTCOUNT>1</OACRDEFECTCOUNT>
+<OACRERRORCOUNT>0</OACRERRORCOUNT>
+<DEFECT _seq="1"><SFA><LINE>13</LINE><COLUMN>80</COLUMN><FILENAME>kwrite.cpp</FILENAME><FILEPATH>f:\programing\driver\klog\</FILEPATH></SFA><DEFECTCODE>28155</DEFECTCODE><DESCRIPTION>The function being assigned or passed should be a KSTART_ROUTINE function:  Add the declaration 'KSTART_ROUTINE WriteFileThread;' before the current first declaration of WriteFileThread.</DESCRIPTION><FUNCTION>InitWriteFileThread</FUNCTION><FUNCLINE>5</FUNCLINE><PATH/></DEFECT>
+</DEFECTS>

@@ -68,7 +68,7 @@ VOID HookDeviceUnload(PDRIVER_OBJECT pDriverObject)
 	KTIMER timer;
 	KeInitializeTimer(&timer);
 	waitTime.QuadPart = 1000000;
-	while (g_PendingWrite>0)
+	while (g_PendingWrite>1)
 	{
 		KeSetTimer(&timer, waitTime, NULL);
 		KeWaitForSingleObject(&timer, Executive, KernelMode, false, NULL);

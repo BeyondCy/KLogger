@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DEFECTS>
+<OACRDEFECTCOUNT>2</OACRDEFECTCOUNT>
+<OACRERRORCOUNT>0</OACRERRORCOUNT>
+<DEFECT _seq="1"><SFA><LINE>59</LINE><COLUMN>30</COLUMN><FILENAME>khook.cpp</FILENAME><FILEPATH>f:\programing\driver\klog\</FILEPATH></SFA><DEFECTCODE>28155</DEFECTCODE><DESCRIPTION>The function being assigned or passed should be a IO_COMPLETION_ROUTINE function:  Add the declaration 'IO_COMPLETION_ROUTINE HookDeviceReadComplete;' before the current first declaration of HookDeviceReadComplete.</DESCRIPTION><FUNCTION>HookDeviceRead</FUNCTION><FUNCLINE>53</FUNCLINE><PATH/></DEFECT>
+<DEFECT _seq="2"><SFA><LINE>80</LINE><COLUMN>46</COLUMN><FILENAME>khook.cpp</FILENAME><FILEPATH>f:\programing\driver\klog\</FILEPATH></SFA><DEFECTCODE>28159</DEFECTCODE><DESCRIPTION>Consider using 'ExAllocatePoolWithTag' instead of 'ExAllocatePool'. Reason: No tag interferes with debugging..</DESCRIPTION><FUNCTION>HookDeviceReadComplete</FUNCTION><FUNCLINE>63</FUNCLINE><PATH/></DEFECT>
+</DEFECTS>

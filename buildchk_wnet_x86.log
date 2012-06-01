@@ -68,9 +68,9 @@ oacr invalidate root:x86chk /autocleanqueue
 1> .\klog.cpp .\khook.cpp .\kwrite.cpp .\scancode.cpp 
 1>klog.cpp
 1>khook.cpp
-1>f:\programing\driver\klog\khook.cpp(76) : warning C4996: 'ExAllocatePool': was declared deprecated
+1>f:\programing\driver\klog\khook.cpp(80) : warning C4996: 'ExAllocatePool': was declared deprecated
 1>warnings in directory f:\programing\driver\klog
-1>f:\programing\driver\klog\khook.cpp(76) : warning C4996: 'ExAllocatePool': was declared deprecated
+1>f:\programing\driver\klog\khook.cpp(80) : warning C4996: 'ExAllocatePool': was declared deprecated
 1> d:\winddk\7600.16385.1\inc\ddk\wdm.h(16147) : see declaration of 'ExAllocatePool'
 1>kwrite.cpp
 1>scancode.cpp

