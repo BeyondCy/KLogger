@@ -1,5 +1,9 @@
 TARGETNAME=Klog
 TARGETTYPE=DRIVER
+<<<<<<< HEAD
 TARGETPATH=BIN
 SOURCES=Klog.cpp KHook.cpp KWrite.cpp ScanCode.cpp
+=======
+SOURCES=Klog.cpp KlogHook.cpp 
+>>>>>>> 37fbd77ca42a7799a32fd6019fa8c0bcf5541923
 
