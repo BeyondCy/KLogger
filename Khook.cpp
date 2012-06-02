@@ -37,7 +37,6 @@ NTSTATUS HookKeyboardDevice(PDRIVER_OBJECT pDriverObject)
 		if (pHookDevice!=NULL)
 		{
 			IoDeleteDevice(pHookDevice);
-			IoDetachDevice(pHookDevice);
 		}
 
 	}
@@ -92,3 +91,4 @@ NTSTATUS HookDeviceReadComplete(PDEVICE_OBJECT pDeviceObject, PIRP pIrp, PVOID C
 	g_PendingWrite--;
 	return pIrp->IoStatus.Status;
 }
+

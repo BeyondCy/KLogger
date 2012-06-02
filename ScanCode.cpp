@@ -227,7 +227,18 @@ void ConvertScanCodeToKeyCode(PDEVICE_EXTENSION pDevExt, KEY_DATA* kData, char* 
 	 //get the key code for the corresponding scan code -- weather or not that key
 	 //code is extended will be determined later.
 	 char key = 0;
-	 key = KeyMap[kData->KeyData];
+	 /*ensure invalid key scancode output zero*/
+	 RtlZeroMemory(keys, 3*sizeof(char));
+	 if (kData->KeyData <= 0x52)
+	 {
+		key = KeyMap[kData->KeyData];
+	 }
+	 else
+	 {//wrong keydata,return 0
+		RtlZeroMemory(keys, 3*sizeof(char));
+		return ;
+	 }
+	 
 	 
 	 /////////////////////////////////////////
 	 //Get and update state of CAPS LOCK key

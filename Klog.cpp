@@ -81,9 +81,10 @@ VOID HookDeviceUnload(PDRIVER_OBJECT pDriverObject)
 	{
 		ZwClose(pKeyboardDeviceExtension->hFile);
 	}
-	if (pKeyboardDeviceExtension->pKeyboardDevice!=NULL)
+	if (pDriverObject->DeviceObject!=NULL)
 	{
 		IoDeleteDevice(pKeyboardDeviceExtension->pKeyboardDevice);
 	}
+
 	return ;
 }

@@ -21,6 +21,7 @@ struct KEY_STATE
 
 typedef struct _DEVICE_EXTENSION{
 	PDEVICE_OBJECT pKeyboardDevice;//保存attach后的设备
+	PDEVICE_OBJECT pHookDevice;//save device before attach keyboarddevice
 	HANDLE hFile;
 	bool bThreadTerminate;
 	PETHREAD pThreadObj;
@@ -28,6 +29,7 @@ typedef struct _DEVICE_EXTENSION{
 	LIST_ENTRY MessageList;
 	KSPIN_LOCK kLock;//insert taillist use
 	struct KEY_STATE kState;//scancode use
+
 }DEVICE_EXTENSION, *PDEVICE_EXTIONSION;
 typedef PDEVICE_EXTIONSION PDEVICE_EXTENSION;
 
